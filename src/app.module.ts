@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { SeederModule } from './seeder/seeder.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { CatalogsModule } from './catalogs/catalogs.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     SeederModule,
     InvitationsModule,
     NotificationsModule,
+    CatalogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
