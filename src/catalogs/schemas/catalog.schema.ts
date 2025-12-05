@@ -1,12 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { CatalogCategory } from '../catalog-category.type';
+import { CatalogCategory, CatalogCategoryEnum } from '../catalog-category.type';
 
 export type CatalogDocument = HydratedDocument<Catalog>;
 
 @Schema({ timestamps: true })
 export class Catalog {
-  @Prop({ required: true, enum: ['livestock', 'crops', 'machinery'] })
+  @Prop({
+    required: true,
+    enum: Object.values(CatalogCategoryEnum),
+  })
   category: CatalogCategory;
 
   @Prop({ required: true })

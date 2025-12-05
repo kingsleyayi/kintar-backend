@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CatalogCategory } from '../catalog-category.type';
+import { CatalogCategory, CatalogCategoryEnum } from '../catalog-category.type';
 
 export class CatalogResponseDto {
-  @ApiProperty({ enum: ['livestock', 'crops', 'machinery'] })
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty({ enum: Object.values(CatalogCategoryEnum) })
   category: CatalogCategory;
 
   @ApiProperty()

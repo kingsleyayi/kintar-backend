@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { CatalogsService } from '../catalogs/catalogs.service';
 import { Catalog } from '../catalogs/schemas/catalog.schema';
+import { CurrenciesService } from '../currencies/currencies.service';
 
 @Injectable()
 export class SeederService {
@@ -13,6 +14,7 @@ export class SeederService {
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
     private readonly catalogsService: CatalogsService,
+    private readonly currenciesService: CurrenciesService,
   ) {}
 
   async seedSystemUser(): Promise<UserResponseDto> {
@@ -225,7 +227,8 @@ export class SeederService {
         name: 'Feed line A2',
         badgeIcon: 'bolt',
         badgeLabel: 'IoT linked',
-        description: 'Supports: Poultry — January group. Track runtime, power, and utilisation.',
+        description:
+          'Supports: Poultry — January group. Track runtime, power, and utilisation.',
         metrics: [
           { label: 'Utilisation', value: '82%' },
           { label: 'Status', value: 'Ready' },
@@ -268,6 +271,7 @@ export class SeederService {
   async seedOnStartup(): Promise<void> {
     await this.ensureSystemUserExists();
     await this.ensureCatalogsSeeded();
+    await this.ensureCurrenciesSeeded();
   }
 
   private async ensureSystemUserExists(): Promise<void> {
@@ -298,5 +302,29 @@ export class SeederService {
       return;
     }
     await this.seedCatalogs();
+  }
+
+  async seedCurrencies(): Promise<void> {
+    const currencies = [
+      { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
+      { code: 'USD', name: 'US Dollar', symbol: '$' },
+      { code: 'EUR', name: 'Euro', symbol: '€' },
+      { code: 'GBP', name: 'British Pound', symbol: '£' },
+      { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
+      { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
+    ];
+
+    this.logger.log('Seeding currencies (upsert)...');
+    await this.currenciesService.upsertMany(currencies);
+    this.logger.log('Currencies seed complete.');
+  }
+
+  private async ensureCurrenciesSeeded(): Promise<void> {
+    const count = await this.currenciesService.findAll();
+    if (count.length > 0) {
+      this.logger.log(`Currencies already seeded (${count.length}); skipping.`);
+      return;
+    }
+    await this.seedCurrencies();
   }
 }

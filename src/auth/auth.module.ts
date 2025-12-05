@@ -19,9 +19,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         if (!secret) {
           throw new Error('JWT_SECRET is not set');
         }
-        const expiresIn =
-          (config.get<string>('JWT_EXPIRES_IN') ??
-            '3600s') as JwtSignOptions['expiresIn'];
+        const expiresIn = (config.get<string>('JWT_EXPIRES_IN') ??
+          '3600s') as JwtSignOptions['expiresIn'];
         return {
           secret,
           signOptions: {

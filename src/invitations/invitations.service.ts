@@ -18,6 +18,7 @@ import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { UserRole } from '../users/schemas/user.schema';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MerchantsService } from '../merchants/merchants.service';
 
 @Injectable()
 export class InvitationsService {
@@ -27,6 +28,7 @@ export class InvitationsService {
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
     private readonly configService: ConfigService,
+    private readonly merchantsService: MerchantsService,
   ) {}
 
   private hashToken(token: string): string {
@@ -93,15 +95,26 @@ export class InvitationsService {
       throw new ConflictException('User already exists for this invitation');
     }
 
+    const merchantName = `${dto.name} (${invitation.email})`;
+    const merchant = await this.merchantsService.ensure(merchantName);
+    const merchantId =
+      (merchant as { _id?: string; id?: string })._id?.toString?.() ??
+      (merchant as { _id?: string; id?: string }).id?.toString?.();
+
     const user = await this.usersService.create(
       {
         name: dto.name,
         email: invitation.email,
         password: dto.password,
         role: UserRole.User,
+        merchantId,
       },
-      { isSystem: false },
+      { isSystem: false, merchantId },
     );
+
+    if (merchantId) {
+      await this.merchantsService.setOwner(merchantId, user.id);
+    }
 
     invitation.status = InvitationStatus.Accepted;
     invitation.acceptedAt = new Date();

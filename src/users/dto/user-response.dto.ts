@@ -17,6 +17,9 @@ export class UserResponseDto {
   @ApiProperty()
   isSystem: boolean;
 
+  @ApiProperty({ required: false })
+  merchantId?: string;
+
   @ApiProperty()
   createdAt: Date;
 

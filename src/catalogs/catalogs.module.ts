@@ -5,7 +5,9 @@ import { CatalogsService } from './catalogs.service';
 import { Catalog, CatalogSchema } from './schemas/catalog.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Catalog.name, schema: CatalogSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: Catalog.name, schema: CatalogSchema }]),
+  ],
   controllers: [CatalogsController],
   providers: [CatalogsService],
   exports: [CatalogsService],

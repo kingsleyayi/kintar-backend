@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CatalogCategory } from './catalog-category.type';
 import { Catalog, CatalogDocument } from './schemas/catalog.schema';
 
@@ -10,6 +10,10 @@ export class CatalogsService {
     @InjectModel(Catalog.name)
     private readonly catalogModel: Model<CatalogDocument>,
   ) {}
+
+  async findById(id: string): Promise<Catalog | null> {
+    return this.catalogModel.findById(id).lean();
+  }
 
   async count(): Promise<number> {
     return this.catalogModel.estimatedDocumentCount();
@@ -35,5 +39,49 @@ export class CatalogsService {
       ),
     );
     await Promise.all(ops);
+  }
+
+  private isMongooseDocument(
+    catalog: CatalogDocument | Catalog,
+  ): catalog is CatalogDocument {
+    return typeof (catalog as CatalogDocument).toObject === 'function';
+  }
+
+  toResponse(
+    catalog:
+      | CatalogDocument
+      | (Catalog & {
+          _id?: Types.ObjectId | string;
+          id?: Types.ObjectId | string;
+          createdAt?: Date;
+          updatedAt?: Date;
+        }),
+  ) {
+    type RawCatalog = Catalog & {
+      _id?: Types.ObjectId | string;
+      id?: Types.ObjectId | string;
+      createdAt?: Date;
+      updatedAt?: Date;
+    };
+
+    const raw = (
+      this.isMongooseDocument(catalog) ? catalog.toObject() : catalog
+    ) as RawCatalog;
+
+    return {
+      id: raw._id?.toString?.() ?? raw.id?.toString?.(),
+      category: raw.category,
+      key: raw.key,
+      name: raw.name,
+      description: raw.description,
+      badgeIcon: raw.badgeIcon,
+      badgeLabel: raw.badgeLabel,
+      metrics: raw.metrics,
+      coverageValue: raw.coverageValue,
+      coverageLabel: raw.coverageLabel,
+      chips: raw.chips,
+      actionLabel: raw.actionLabel,
+      order: raw.order,
+    };
   }
 }

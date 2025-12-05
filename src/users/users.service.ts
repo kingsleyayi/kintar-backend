@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument, UserRole } from './schemas/user.schema';
@@ -19,7 +19,7 @@ export class UsersService {
 
   async create(
     createUserDto: CreateUserDto,
-    options?: { isSystem?: boolean },
+    options?: { isSystem?: boolean; merchantId?: string },
   ): Promise<UserResponseDto> {
     const existing = await this.userModel
       .findOne({ email: createUserDto.email.toLowerCase() })
@@ -30,11 +30,17 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const merchantId = options?.merchantId ?? createUserDto.merchantId;
+    if (!merchantId) {
+      throw new ConflictException('merchantId is required');
+    }
+
     const user = await this.userModel.create({
       ...createUserDto,
       email: createUserDto.email.toLowerCase(),
       password: hashedPassword,
       isSystem: options?.isSystem ?? false,
+      merchantId,
     });
 
     return this.toResponseDto(user);
@@ -44,6 +50,7 @@ export class UsersService {
     name: string,
     email: string,
     password: string,
+    merchantId?: string,
   ): Promise<UserResponseDto> {
     const existing = await this.userModel.findOne({ email }).exec();
     if (existing) {
@@ -57,6 +64,7 @@ export class UsersService {
       password: hashedPassword,
       role: UserRole.SystemAdmin,
       isSystem: true,
+      merchantId: merchantId ?? '',
     });
 
     return this.toResponseDto(user);
@@ -81,11 +89,33 @@ export class UsersService {
     return this.toResponseDto(user);
   }
 
-  toResponseDto(user: UserDocument | any): UserResponseDto {
-    const raw = (user as any).toObject ? (user as any).toObject() : user;
-    const id =
-      raw._id?.toString?.() ??
-      (raw.id ? raw.id.toString?.() ?? raw.id : undefined);
+  private isMongooseDocument(user: UserDocument | User): user is UserDocument {
+    return typeof (user as UserDocument).toObject === 'function';
+  }
+
+  toResponseDto(
+    user:
+      | UserDocument
+      | (User & {
+          _id?: Types.ObjectId | string;
+          id?: Types.ObjectId | string;
+          createdAt?: Date;
+          updatedAt?: Date;
+          merchantId?: Types.ObjectId | string | null;
+        }),
+  ): UserResponseDto {
+    type RawUser = User & {
+      _id?: Types.ObjectId | string;
+      id?: Types.ObjectId | string;
+      createdAt?: Date;
+      updatedAt?: Date;
+      merchantId?: Types.ObjectId | string | null;
+    };
+
+    const raw = (
+      this.isMongooseDocument(user) ? user.toObject() : user
+    ) as RawUser;
+    const id = raw._id?.toString?.() ?? raw.id?.toString?.() ?? '';
 
     return {
       id,
@@ -93,8 +123,17 @@ export class UsersService {
       email: raw.email,
       role: raw.role,
       isSystem: raw.isSystem,
+      merchantId: this.normalizeId(raw.merchantId),
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     };
+  }
+
+  private normalizeId(
+    value?: string | Types.ObjectId | null,
+  ): string | undefined {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === 'string') return value;
+    return value.toString?.();
   }
 }

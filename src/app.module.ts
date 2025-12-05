@@ -10,6 +10,10 @@ import { SeederModule } from './seeder/seeder.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CatalogsModule } from './catalogs/catalogs.module';
+import { BatchesModule } from './batches/batches.module';
+import { OutputTypesModule } from './output-types/output-types.module';
+import { MerchantsModule } from './merchants/merchants.module';
+import { CurrenciesModule } from './currencies/currencies.module';
 
 @Module({
   imports: [
@@ -29,6 +33,10 @@ import { CatalogsModule } from './catalogs/catalogs.module';
     InvitationsModule,
     NotificationsModule,
     CatalogsModule,
+    BatchesModule,
+    OutputTypesModule,
+    MerchantsModule,
+    CurrenciesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

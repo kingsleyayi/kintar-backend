@@ -7,14 +7,18 @@ import { Invitation, InvitationSchema } from './schemas/invitation.schema';
 import { UsersModule } from '../users/users.module';
 import { AuthModule } from '../auth/auth.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { MerchantsModule } from '../merchants/merchants.module';
 
 @Module({
   imports: [
     ConfigModule,
-    MongooseModule.forFeature([{ name: Invitation.name, schema: InvitationSchema }]),
+    MongooseModule.forFeature([
+      { name: Invitation.name, schema: InvitationSchema },
+    ]),
     UsersModule,
     NotificationsModule,
     AuthModule,
+    MerchantsModule,
   ],
   controllers: [InvitationsController],
   providers: [InvitationsService],

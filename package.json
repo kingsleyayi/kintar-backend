@@ -16,6 +16,7 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "seed:system-user": "ts-node -r tsconfig-paths/register src/seeder/system-user.seeder.ts",
     "seed:catalogs": "ts-node -r tsconfig-paths/register src/seeder/catalogs.seeder.ts",
+    "seed:backfill-merchant": "ts-node -r tsconfig-paths/register src/seeder/backfill-merchant.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

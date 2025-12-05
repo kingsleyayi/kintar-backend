@@ -16,7 +16,9 @@ async function bootstrap() {
     logger.log('Running system user seeder...');
     const user = await seeder.seedSystemUser();
     logger.log(`System user ready: ${user.email}`);
-    logger.log('You can log in with the configured system credentials to fetch a token.');
+    logger.log(
+      'You can log in with the configured system credentials to fetch a token.',
+    );
     logger.log(
       `JWT expires in: ${config.get<string>('JWT_EXPIRES_IN') ?? 'default'}`,
     );

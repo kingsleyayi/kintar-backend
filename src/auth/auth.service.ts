@@ -42,7 +42,9 @@ export class AuthService {
     }
 
     return {
-      accessToken: this.createAccessToken(this.usersService.toResponseDto(user)),
+      accessToken: this.createAccessToken(
+        this.usersService.toResponseDto(user),
+      ),
     };
   }
 
@@ -51,6 +53,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      merchantId: user.merchantId,
     };
     return this.jwtService.sign(payload);
   }
